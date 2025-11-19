@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Simulateur immo</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f5f5f5;
+      padding: 2rem;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      width: 100%;
+      max-width: 900px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      margin-top: 0;
+    }
+    .subtitle {
+      text-align: center;
+      margin-top: -10px;
+      margin-bottom: 20px;
+      opacity: 0.8;
+    }
+
+    /* Formulaire */
+    .form {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+    }
+    input, select, button {
+      padding: 0.6rem 0.8rem;
+      border-radius: 0.4rem;
+      font-size: 1rem;
+      border: 1px solid #d4d4d4;
+    }
+    input, select {
+      width: 100%;
+    }
+    button {
+      background: #000;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    button:hover {
+      background: #242424;
+    }
+
+    /* Blocs de comparaison */
+    .duo-block {
+      margin-top: 2rem;
+      padding: 1rem 1.5rem;
+      border-radius: 1rem;
+      background: #fafafa;
+      border: 1px solid #e5e5e5;
+    }
+    .duo-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .percent-diff {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      padding: 0.6rem;
+      border-bottom: 1px solid #e8e8e8;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: #f2f2f2;
+      font-weight: 600;
+    }
+
+    /* Barres */
+    .bar-container {
+      width: 100%;
+      background: #e6e6e6;
+      height: 18px;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+    .bar {
+      height: 100%;
+    }
+    .surface-text {
+      font-size: 0.9rem;
+      opacity: 0.85;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <center><h2>Combien de m² supplémentaires la banlieue peut-elle vous offrir ?</h2></center>
+  <p class="subtitle">
+    Indiquez votre budget et découvrez la surface supplémentaire que vous pourriez obtenir à <b><span style="color: #fc353f;">Pantin</span></b>, <b><span style="color: #ffd000;">Montreuil</span></b>, et <b><span style="color: #242424;">Saint-Ouen</span></b>, par rapport à l’arrondissement parisien le plus proche.
+  </p>
+
+  <div class="form">
+    <div style="flex:2;">
+      <label>Budget (€)</label>
+      <input type="number" id="budget" placeholder="Ex : 500000" />
+    </div>
+    <div style="flex:1;">
+      <label>Type de bien</label>
+      <select id="typeBien">
+        <option value="appartement">Appartement</option>
+        <option value="maison">Maison</option>
+        <option value="both">Appartement + Maison</option>
+      </select>
+    </div>
+    <div style="flex:0 0 140px; align-self:flex-end;">
+      <button onclick="calculer()">Calculer</button>
+    </div>
+  </div>
+
+  <div id="results"></div>
+</div>
+
+<script>
+  // Prix au m²
+  const PRIX_M2 = {
+    "Paris XIX":   { appartement: 7742, maison: 9347 },
+    "Pantin":      { appartement: 6020, maison: 6293 },
+    "Paris XX":    { appartement: 8264, maison: 9207 },
+    "Montreuil":   { appartement: 6219, maison: 5916 },
+    "Paris XVIII": { appartement: 8993, maison: 10883 },
+    "Saint-Ouen":  { appartement: 6061, maison: 6965 }
+  };
+
+  // Groupes de comparaison
+  const DUOS = [
+    { title: "Comparaison entre Pantin et Paris XIX",      cities: ["Paris XIX", "Pantin"],      class: "duo1" },
+    { title: "Comparaison entre Montreuil et Paris XX",    cities: ["Paris XX", "Montreuil"],    class: "duo2" },
+    { title: "Comparaison entre Saint-Ouen et Paris XVIII", cities: ["Paris XVIII", "Saint-Ouen"], class: "duo3" }
+  ];
+
+  // Couleurs : arrondissement (plus clair) / banlieue (couleur de base)
+  const COLORS = {
+    duo1: { paris: "#ffb1b5", banlieue: "#fc353f" },  // rouge clair / rouge
+    duo2: { paris: "#ffe766", banlieue: "#ffd000" },  // jaune clair / jaune
+    duo3: { paris: "#555555", banlieue: "#242424" }   // gris / noir
+  };
+
+  function calculer() {
+    const budget = parseFloat(document.getElementById("budget").value);
+    const typeBien = document.getElementById("typeBien").value;
+    const results = document.getElementById("results");
+
+    if (!budget || budget <= 0) {
+      results.innerHTML = "<p style='color:red;'>Il semble que vous n'avez pas rentré votre budget...</p>";
+      return;
+    }
+
+    results.innerHTML = "";
+
+    DUOS.forEach(duo => {
+      let html = `<div class="duo-block ${duo.class}">
+        <div class="duo-title">${duo.title}</div>
+      `;
+
+      // fonction qui calcule les surfaces pour un type donné (appartement/maison)
+      const computeSurfaces = (type) =>
+        duo.cities.map(ville => budget / PRIX_M2[ville][type]);
+
+      const showType = (label, type) => {
+        const surfaces = computeSurfaces(type);
+        const maxSurface = Math.max(...surfaces);
+
+        // surfaces[0] = arrondissement, surfaces[1] = banlieue
+        const diff = ((surfaces[1] - surfaces[0]) / surfaces[0]) * 100;
+        const parisName = duo.cities[0];
+        const banlieueName = duo.cities[1];
+
+        html += `
+          <div class="percent-diff">
+            À ${banlieueName}, vous pouvez acheter un logement ${diff.toFixed(1)} % plus grand qu'à ${parisName}.
+          </div>
+          <table>
+            <tr>
+              <th>Ville</th>
+              <th>Prix/m²</th>
+              <th>${label}</th>
+            </tr>
+        `;
+
+        const colors = COLORS[duo.class];
+
+        duo.cities.forEach((ville, index) => {
+          const prix = PRIX_M2[ville][type];
+          const surface = surfaces[index];
+          const barWidth = (surface / maxSurface) * 100;
+          const isParis = (index === 0);
+          const barColor = isParis ? colors.paris : colors.banlieue;
+
+          html += `
+            <tr>
+              <td><strong>${ville}</strong></td>
+              <td>${prix.toLocaleString("fr-FR")} €/m²</td>
+              <td>
+                <div class="bar-container">
+                  <div class="bar" style="width:${barWidth}%; background:${barColor};"></div>
+                </div>
+                <div class="surface-text">${surface.toFixed(1)} m²</div>
+              </td>
+            </tr>
+          `;
+        });
+
+        html += `</table>`;
+      };
+
+      if (typeBien === "both") {
+        showType("Appartement", "appartement");
+        showType("Maison", "maison");
+      } else {
+        const label = typeBien === "appartement" ? "Appartement" : "Maison";
+        showType(label, typeBien);
+      }
+
+      html += `</div>`;
+      results.innerHTML += html;
+    });
+  }
+</script>
+
+</body>
+</html>
+
+
