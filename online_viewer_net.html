@@ -10,7 +10,7 @@
       padding: 0;
       display: flex;
       justify-content: center;
-      font-size: 14px;
+      font-size: 13px;
     }
     .container {
       background: white;
@@ -45,11 +45,9 @@
       cursor: pointer;
       font-weight: 600;
       font-family: "Inter", system-ui, sans-serif;
-      font-size: 0.85rem;
+      font-size: 0.78rem;
       padding: 0.45rem 0.6rem;
       letter-spacing: 0.2px;
-    }f;
-      font-weight: 500;
     }
     button {
       background: #000;
@@ -70,12 +68,12 @@
       border: 1px solid #e5e5e5;
     }
     .duo-title {
-      font-size: 1.4rem;
+      font-size: 1.25rem;
       font-weight: 700;
       margin-bottom: 0.5rem;
     }
     .percent-diff {
-      font-size: 0.95rem;
+      font-size: 0.85rem;
       font-weight: 600;
       margin-bottom: 1rem;
     }
@@ -108,7 +106,7 @@
       height: 100%;
     }
     .surface-text {
-      font-size: 0.9rem;
+      font-size: 0.8rem;
       opacity: 0.85;
       font-weight: 600;
     }
@@ -202,7 +200,12 @@
 
       const showType = (label, type) => {
         const surfaces = computeSurfaces(type);
-        const maxSurface = Math.max(...surfaces);
+
+        // NEW: same scale for appartements & maisons
+        const maxSurface = Math.max(
+          ...computeSurfaces("appartement"),
+          ...computeSurfaces("maison")
+        );(...surfaces);
 
         const diff = ((surfaces[1] - surfaces[0]) / surfaces[0]) * 100;
         const parisName = duo.cities[0];
