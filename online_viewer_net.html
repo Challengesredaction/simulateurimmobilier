@@ -7,21 +7,20 @@
     body {
       font-family: system-ui, sans-serif;
       background: #f5f5f5;
-      padding: 0;
+      padding: 2rem;
       display: flex;
       justify-content: center;
-      font-size: 13px;
     }
     .container {
       background: white;
-      padding: 1.2rem;
-      border-radius: 0.7rem;
+      padding: 2rem;
+      border-radius: 1rem;
       width: 100%;
-      max-width: 100%;
-      box-shadow: none;
+      max-width: 900px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.1);
     }
-
-    h2 {
+    h1 {
+      text-align: center;
       margin-top: 0;
     }
     .subtitle {
@@ -37,17 +36,14 @@
       flex-wrap: wrap;
       margin-bottom: 2rem;
     }
-
     input, select, button {
-      background: #ffffff;
-      color: #000;
-      border: 1px solid #ccc;
-      cursor: pointer;
-      font-weight: 600;
-      font-family: "Inter", system-ui, sans-serif;
-      font-size: 0.78rem;
-      padding: 0.45rem 0.6rem;
-      letter-spacing: 0.2px;
+      padding: 0.6rem 0.8rem;
+      border-radius: 0.4rem;
+      font-size: 1rem;
+      border: 1px solid #d4d4d4;
+    }
+    input, select {
+      width: 100%;
     }
     button {
       background: #000;
@@ -68,12 +64,12 @@
       border: 1px solid #e5e5e5;
     }
     .duo-title {
-      font-size: 1.25rem;
+      font-size: 1.4rem;
       font-weight: 700;
       margin-bottom: 0.5rem;
     }
     .percent-diff {
-      font-size: 0.85rem;
+      font-size: 0.95rem;
       font-weight: 600;
       margin-bottom: 1rem;
     }
@@ -106,25 +102,9 @@
       height: 100%;
     }
     .surface-text {
-      font-size: 0.8rem;
+      font-size: 0.9rem;
       opacity: 0.85;
       font-weight: 600;
-    }
-
-    /* --- Responsive improvements for mobile --- */
-    @media (max-width: 600px) {
-      .container {
-        padding: 1rem;
-      }
-
-      .form {
-        flex-direction: column;
-        gap: 0.7rem;
-      }
-
-      button {
-        width: 100%;
-      }
     }
   </style>
 </head>
@@ -137,11 +117,11 @@
   </p>
 
   <div class="form">
-    <div style="flex:2; width:100%;">
+    <div style="flex:2;">
       <label>Budget (€)</label>
       <input type="number" id="budget" placeholder="Ex : 500000" />
     </div>
-    <div style="flex:1; width:100%;">
+    <div style="flex:1;">
       <label>Type de bien</label>
       <select id="typeBien">
         <option value="appartement">Appartement</option>
@@ -149,8 +129,8 @@
         <option value="both">Appartement + Maison</option>
       </select>
     </div>
-    <div style="width:100%; align-self:flex-end;">
-      <button id="btnCalculate" type="button">Calculer</button>
+    <div style="flex:0 0 140px; align-self:flex-end;">
+      <button onclick="calculer()">Calculer</button>
     </div>
   </div>
 
@@ -179,7 +159,7 @@
     duo3: { paris: "#555555", banlieue: "#242424" }
   };
 
-  window.calculer = function calculer() {
+  function calculer() {
     const budget = parseFloat(document.getElementById("budget").value);
     const typeBien = document.getElementById("typeBien").value;
     const results = document.getElementById("results");
@@ -200,12 +180,7 @@
 
       const showType = (label, type) => {
         const surfaces = computeSurfaces(type);
-
-        // NEW: same scale for appartements & maisons
-        const maxSurface = Math.max(
-          ...computeSurfaces("appartement"),
-          ...computeSurfaces("maison")
-        );(...surfaces);
+        const maxSurface = Math.max(...surfaces);
 
         const diff = ((surfaces[1] - surfaces[0]) / surfaces[0]) * 100;
         const parisName = duo.cities[0];
@@ -239,36 +214,4 @@
                 <div class="bar-container">
                   <div class="bar" style="width:${barWidth}%; background:${barColor};"></div>
                 </div>
-                <div class="surface-text">${surface.toFixed(1)} m²</div>
-              </td>
-            </tr>`;
-        });
-
-        html += `</table>`;
-      };
-
-      if (typeBien === "both") {
-        showType("Appartement", "appartement");
-        showType("Maison", "maison");
-      } else {
-        const label = typeBien === "appartement" ? "Appartement" : "Maison";
-        showType(label, typeBien);
-      }
-
-      html += `</div>`;
-      results.innerHTML += html;
-    });
-  }
-
-  
-  // Attach click handler to the calculate button (in case inline handlers were removed)
-  (function(){
-    var btn = document.getElementById('btnCalculate');
-    if (btn && typeof calculer === 'function') {
-      btn.addEventListener('click', function(e){ e.preventDefault(); calculer(); });
-    }
-  })();
-
-</script>
-</body>
-</html>
+                <div class="surface-text">${surface
