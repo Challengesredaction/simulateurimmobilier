@@ -136,21 +136,21 @@
 
 <div class="container">
   <div class="card">
-
-    <h2 class="title">Combien de m² supplémentaires la banlieue peut-elle vous offrir ?</h2>
+    <h2 class="title"><span style="font-family:'Helvetica Neue'">Pour le même prix, combien de m² pouvez-vous gagner en achetant en banlieue ?</h2>
     <div class="subtitle">
-      Indiquez votre budget et découvrez la surface supplémentaire à <strong style="color:#fc353f">Pantin</strong>, <strong style="color:#ffd000">Montreuil</strong> et <strong style="color:#242424">Saint-Ouen</strong> par rapport à l’arrondissement parisien.
+      Indiquez votre budget et découvrez la surface supplémentaire que vous pourriez obtenir à <strong style="color:#fc353f">Pantin</strong>, <strong style="color:#ffd000">Montreuil</strong> et <strong style="color:#242424">Saint-Ouen</strong>, par rapport à l’arrondissement parisien le plus proche.
+      
     </div>
 
     <!-- Form -->
     <div class="form-row" role="form" aria-label="Formulaire simulateur">
       <div class="form-col" style="flex:2">
-        <label for="budget">Budget (€)</label>
+        <label for="budget">Votre budget (€)</label>
         <input id="budget" type="number" placeholder="Ex : 500000" />
       </div>
 
       <div class="form-col" style="flex:1">
-        <label for="typeBien">Type de bien</label>
+        <label for="typeBien">Sélectionnez le type de bien recherché</label>
         <select id="typeBien" aria-label="Type de bien">
           <option value="appartement">Appartement</option>
           <option value="maison">Maison</option>
@@ -161,6 +161,7 @@
       <div class="form-col" style="flex:0 0 140px; align-self:flex-end">
         <!-- White harmonised button, no black -->
         <button id="btnCalculate" type="button">Calculer</button>
+
       </div>
     </div>
 
@@ -214,7 +215,7 @@
     duosContainer.innerHTML = "";
 
     if (!budget || budget <= 0) {
-      resultsDiv.innerHTML = '<p style="color:red; font-weight:600">Il semble que vous n\'avez pas rentré votre budget...</p>';
+      resultsDiv.innerHTML = '<p style="color:red; font-weight:600">Il semble que vous n’ayez pas rentré votre budget...</p>';
       return;
     }
 
@@ -234,8 +235,8 @@
         const diff = ((surfaces[1] - surfaces[0]) / surfaces[0]) * 100;
         const parisName = duo.cities[0];
         const banlieueName = duo.cities[1];
-        html += `<div class="percent-diff">À ${banlieueName}, vous pouvez acheter un logement ${diff.toFixed(1)}% plus grand qu'à ${parisName}.</div>`;
-        html += `<table><tr><th>Ville</th><th>Prix/m²</th><th>${label}</th></tr>`;
+        html += `<div class="percent-diff">À ${banlieueName}, vous pouvez acheter un logement ${diff.toFixed(1)} % plus grand qu'à ${parisName}.</div>`;
+        html += `<table><tr><th>Ville</th><th>Prix moyen/m²</th><th>${label}</th></tr>`;
 
         duo.cities.forEach((ville,idx)=>{
           const prix = PRIX_M2[ville][type];
@@ -292,7 +293,6 @@
       }
     });
   })();
-
 </script>
 </body>
 </html>
