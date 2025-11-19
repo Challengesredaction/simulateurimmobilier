@@ -1,143 +1,183 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <title>Simulateur immo</title>
-  <style>
-    body {
-      font-family: system-ui, sans-serif;
-      background: #f5f5f5;
-      padding: 2rem;
-      display: flex;
-      justify-content: center;
-    }
-    .container {
-      background: white;
-      padding: 2rem;
-      border-radius: 1rem;
-      width: 100%;
-      max-width: 900px;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.1);
-    }
-    h1 {
-      text-align: center;
-      margin-top: 0;
-    }
-    .subtitle {
-      text-align: center;
-      margin-top: -10px;
-      margin-bottom: 20px;
-      opacity: 0.8;
-    }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Simulateur immo — Pantin / Montreuil / Saint-Ouen</title>
+<style>
+  /* Reset minimal */
+  html,body{height:100%;margin:0;padding:0}
 
-    .form {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-      margin-bottom: 2rem;
-    }
-    input, select, button {
-      padding: 0.6rem 0.8rem;
-      border-radius: 0.4rem;
-      font-size: 1rem;
-      border: 1px solid #d4d4d4;
-    }
-    input, select {
-      width: 100%;
-    }
-    button {
-      background: #000;
-      color: #fff;
-      border: none;
-      cursor: pointer;
-      font-weight: 600;
-    }
-    button:hover {
-      background: #242424;
-    }
+  /* Global (smaller, harmonised) */
+  body{
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    font-size:13px;            /* un poil plus petit partout */
+    background: #f5f5f5;
+    color:#111;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
 
-    .duo-block {
-      margin-top: 2rem;
-      padding: 1rem 1.5rem;
-      border-radius: 1rem;
-      background: #fafafa;
-      border: 1px solid #e5e5e5;
-    }
-    .duo-title {
-      font-size: 1.4rem;
-      font-weight: 700;
-      margin-bottom: 0.5rem;
-    }
-    .percent-diff {
-      font-size: 0.95rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
-    }
+  /* Container: no outer margin so it can fill the template width */
+  .container{
+    width:100%;
+    max-width:100%;
+    box-sizing:border-box;
+    padding: 16px;            /* internal padding only */
+    display:flex;
+    justify-content:center;
+  }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 1rem;
-    }
-    th, td {
-      padding: 0.6rem;
-      border-bottom: 1px solid #e8e8e8;
-      text-align: left;
-      vertical-align: top;
-    }
-    th {
-      background: #f2f2f2;
-      font-weight: 600;
-    }
+  /* Card that holds the simulator — will expand to parent's width */
+  .card{
+    width:100%;
+    max-width:1200px;        /* optional constraint; remove if you want fully unconstrained */
+    background:#fff;
+    border-radius:10px;
+    box-shadow:0 10px 24px rgba(0,0,0,0.06);
+    padding:18px;
+    box-sizing:border-box;
+  }
 
-    .bar-container {
-      width: 100%;
-      background: #e6e6e6;
-      height: 18px;
-      border-radius: 6px;
-      overflow: hidden;
-      margin-bottom: 6px;
-    }
-    .bar {
-      height: 100%;
-    }
-    .surface-text {
-      font-size: 0.9rem;
-      opacity: 0.85;
-      font-weight: 600;
-    }
-  </style>
+  .title{ text-align:center; margin:0 0 6px 0; font-size:16px; font-weight:700 }
+  .subtitle{ text-align:center; margin:0 0 14px 0; color:#666; font-size:12.5px }
+
+  /* Form area: two columns on desktop, stacks on smaller screens */
+  .form-row{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    align-items:end;
+    margin-bottom:14px;
+  }
+
+  .form-col{ flex:1 1 0; min-width:180px; box-sizing:border-box; }
+
+  label{ display:block; margin-bottom:6px; font-weight:600; font-size:12px; color:#222 }
+
+  input[type=number], select, button{
+    width:100%;
+    padding:8px 10px;
+    border-radius:6px;
+    border:1px solid #ddd;
+    font-size:13px;
+    box-sizing:border-box;
+    font-family:inherit;    /* same font as rest */
+    -webkit-appearance:none;
+    appearance:none;
+  }
+
+  /* Harmonised white button (not black) */
+  button{
+    background:#fff;
+    color:#111;
+    border:1px solid #cfcfcf;
+    font-weight:700;
+    cursor:pointer;
+  }
+  button:active{ transform: translateY(1px); }
+
+  /* Results + duos area */
+  .duos{
+    display:flex;
+    gap:16px;
+    flex-wrap:wrap;           /* so a duo can drop to next line on narrow screens */
+    margin-top:6px;
+  }
+
+  .duo-block{
+    background:#fafafa;
+    border:1px solid #eee;
+    border-radius:10px;
+    padding:12px;
+    box-sizing:border-box;
+    flex:1 1 320px;           /* allows wrapping: right block will drop under on small width */
+    min-width:260px;
+  }
+
+  .duo-title{ font-size:14px; font-weight:700; margin-bottom:8px }
+  .percent-diff{ font-size:12.5px; font-weight:600; margin-bottom:10px; color:#222 }
+
+  table{ width:100%; border-collapse:collapse; font-size:13px }
+  th,td{ padding:8px 6px; text-align:left; vertical-align:top; border-bottom:1px solid #efeef0 }
+  th{ background:#f7f7f7; font-weight:700; font-size:12.5px }
+
+  /* Bar visuals */
+  .bar-container{
+    width:100%;
+    background:#e8e8e8;
+    height:12px;
+    border-radius:8px;
+    overflow:hidden;
+    margin-bottom:6px;
+  }
+  .bar{ height:100%; border-radius:8px }
+
+  .surface-text{ font-size:12px; font-weight:600; color:#222 }
+
+  /* Small screens: stack form fields vertically and ensure duo blocks don't touch */
+  @media (max-width:900px){
+    .form-row{ flex-direction:column; align-items:stretch }
+    .form-col{ min-width:0 }
+    .duos{ flex-direction:column; gap:12px } /* Duo right will return under left */
+    .card{ padding:12px }
+  }
+
+  /* Very small: tighten spacing */
+  @media (max-width:480px){
+    body{ font-size:12.5px }
+    .bar-container{ height:10px }
+    .duo-block{ padding:10px }
+  }
+
+</style>
 </head>
 <body>
 
 <div class="container">
-  <center><h2>Combien de m² supplémentaires la banlieue peut-elle vous offrir ?</h2></center>
-  <p class="subtitle">
-    Indiquez votre budget et découvrez la surface supplémentaire que vous pourriez obtenir à <b><span style="color: #fc353f;">Pantin</span></b>, <b><span style="color: #ffd000;">Montreuil</span></b>, et <b><span style="color: #242424;">Saint-Ouen</span></b>, par rapport à l’arrondissement parisien le plus proche.
-  </p>
+  <div class="card">
 
-  <div class="form">
-    <div style="flex:2;">
-      <label>Budget (€)</label>
-      <input type="number" id="budget" placeholder="Ex : 500000" />
+    <h2 class="title">Combien de m² supplémentaires la banlieue peut-elle vous offrir ?</h2>
+    <div class="subtitle">
+      Indiquez votre budget et découvrez la surface supplémentaire à <strong style="color:#fc353f">Pantin</strong>, <strong style="color:#ffd000">Montreuil</strong> et <strong style="color:#242424">Saint-Ouen</strong> par rapport à l’arrondissement parisien.
     </div>
-    <div style="flex:1;">
-      <label>Type de bien</label>
-      <select id="typeBien">
-        <option value="appartement">Appartement</option>
-        <option value="maison">Maison</option>
-        <option value="both">Appartement + Maison</option>
-      </select>
+
+    <!-- Form -->
+    <div class="form-row" role="form" aria-label="Formulaire simulateur">
+      <div class="form-col" style="flex:2">
+        <label for="budget">Budget (€)</label>
+        <input id="budget" type="number" placeholder="Ex : 500000" />
+      </div>
+
+      <div class="form-col" style="flex:1">
+        <label for="typeBien">Type de bien</label>
+        <select id="typeBien" aria-label="Type de bien">
+          <option value="appartement">Appartement</option>
+          <option value="maison">Maison</option>
+          <option value="both">Appartement + Maison</option>
+        </select>
+      </div>
+
+      <div class="form-col" style="flex:0 0 140px; align-self:flex-end">
+        <!-- White harmonised button, no black -->
+        <button id="btnCalculate" type="button">Calculer</button>
+      </div>
     </div>
-    <div style="flex:0 0 140px; align-self:flex-end;">
-      <button onclick="calculer()">Calculer</button>
+
+    <!-- Results area (duos) -->
+    <div id="results-area">
+      <div id="results" style="margin-bottom:10px"></div>
+
+      <div class="duos" id="duosContainer">
+        <!-- Duo blocks injected by JS -->
+      </div>
     </div>
+
   </div>
-
-  <div id="results"></div>
 </div>
 
 <script>
+  /* Data (original) */
   const PRIX_M2 = {
     "Paris XIX":   { appartement: 7742, maison: 9347 },
     "Pantin":      { appartement: 6020, maison: 6293 },
@@ -148,8 +188,8 @@
   };
 
   const DUOS = [
-    { title: "Comparaison entre Pantin et Paris XIX",      cities: ["Paris XIX", "Pantin"],      class: "duo1" },
-    { title: "Comparaison entre Montreuil et Paris XX",    cities: ["Paris XX", "Montreuil"],    class: "duo2" },
+    { title: "Comparaison entre Pantin et Paris XIX",       cities: ["Paris XIX", "Pantin"],      class: "duo1" },
+    { title: "Comparaison entre Montreuil et Paris XX",     cities: ["Paris XX", "Montreuil"],    class: "duo2" },
     { title: "Comparaison entre Saint-Ouen et Paris XVIII", cities: ["Paris XVIII", "Saint-Ouen"], class: "duo3" }
   ];
 
@@ -159,59 +199,100 @@
     duo3: { paris: "#555555", banlieue: "#242424" }
   };
 
-  function calculer() {
+  /* Utility: format number with space thousands (fr) */
+  function fnum(n){ return Number(n).toLocaleString('fr-FR'); }
+
+  /* Main calculer function - exposed on window so safe */
+  window.calculer = function calculer() {
     const budget = parseFloat(document.getElementById("budget").value);
     const typeBien = document.getElementById("typeBien").value;
-    const results = document.getElementById("results");
+    const resultsDiv = document.getElementById("results");
+    const duosContainer = document.getElementById("duosContainer");
+
+    // Clear previous
+    resultsDiv.innerHTML = "";
+    duosContainer.innerHTML = "";
 
     if (!budget || budget <= 0) {
-      results.innerHTML = "<p style='color:red;'>Il semble que vous n'avez pas rentré votre budget...</p>";
+      resultsDiv.innerHTML = '<p style="color:red; font-weight:600">Il semble que vous n\'avez pas rentré votre budget...</p>';
       return;
     }
 
-    results.innerHTML = "";
-
+    // For each duo, compute and render
     DUOS.forEach(duo => {
-      let html = `<div class="duo-block ${duo.class}">
-        <div class="duo-title">${duo.title}</div>`;
+      let html = `<div class="duo-block ${duo.class}">`;
+      html += `<div class="duo-title">${duo.title}</div>`;
 
-      const computeSurfaces = (type) =>
-        duo.cities.map(ville => budget / PRIX_M2[ville][type]);
+      /* Compute a shared maxSurface for BOTH types (appartement & maison) so bars are on same scale */
+      // compute surfaces for both types for both cities, then get the maximum
+      const surfacesApp = duo.cities.map(v => budget / PRIX_M2[v].appartement);
+      const surfacesMaison = duo.cities.map(v => budget / PRIX_M2[v].maison);
+      const sharedMax = Math.max(...surfacesApp, ...surfacesMaison, 1); // avoid divide by zero
 
-      const showType = (label, type) => {
-        const surfaces = computeSurfaces(type);
-        const maxSurface = Math.max(...surfaces);
-
+      function renderType(label, type) {
+        const surfaces = type === 'appartement' ? surfacesApp : surfacesMaison;
         const diff = ((surfaces[1] - surfaces[0]) / surfaces[0]) * 100;
         const parisName = duo.cities[0];
         const banlieueName = duo.cities[1];
+        html += `<div class="percent-diff">À ${banlieueName}, vous pouvez acheter un logement ${diff.toFixed(1)}% plus grand qu'à ${parisName}.</div>`;
+        html += `<table><tr><th>Ville</th><th>Prix/m²</th><th>${label}</th></tr>`;
 
-        html += `
-          <div class="percent-diff">
-            À ${banlieueName}, vous pouvez acheter un logement ${diff.toFixed(1)} % plus grand qu'à ${parisName}.
-          </div>
-          <table>
-            <tr>
-              <th>Ville</th>
-              <th>Prix/m²</th>
-              <th>${label}</th>
-            </tr>`;
-
-        const colors = COLORS[duo.class];
-
-        duo.cities.forEach((ville, index) => {
+        duo.cities.forEach((ville,idx)=>{
           const prix = PRIX_M2[ville][type];
-          const surface = surfaces[index];
-          const barWidth = (surface / maxSurface) * 100;
-          const isParis = (index === 0);
-          const barColor = isParis ? colors.paris : colors.banlieue;
+          const surface = surfaces[idx];
+          const barWidth = Math.max( (surface / sharedMax) * 100 , 2 ); // min width so visible
+          const isParis = (idx === 0);
+          const barColor = isParis ? COLORS[duo.class].paris : COLORS[duo.class].banlieue;
+          html += `<tr>
+            <td><strong>${ville}</strong></td>
+            <td>${fnum(prix)} € / m²</td>
+            <td>
+              <div class="bar-container"><div class="bar" style="width:${barWidth}%; background:${barColor};"></div></div>
+              <div class="surface-text">${surface.toFixed(1)} m²</div>
+            </td>
+          </tr>`;
+        });
 
-          html += `
-            <tr>
-              <td><strong>${ville}</strong></td>
-              <td>${prix.toLocaleString("fr-FR")} €/m²</td>
-              <td>
-                <div class="bar-container">
-                  <div class="bar" style="width:${barWidth}%; background:${barColor};"></div>
-                </div>
-                <div class="surface-text">${surface
+        html += `</table>`;
+      }
+
+      if (typeBien === "both") {
+        renderType("Appartement", "appartement");
+        renderType("Maison", "maison");
+      } else if (typeBien === "appartement" || typeBien === "maison") {
+        const label = typeBien === "appartement" ? "Appartement" : "Maison";
+        renderType(label, typeBien);
+      } else {
+        // default: show both if no explicit selection (defensive)
+        renderType("Appartement", "appartement");
+        renderType("Maison", "maison");
+      }
+
+      html += `</div>`; // end duo-block
+      duosContainer.insertAdjacentHTML('beforeend', html);
+    });
+
+    // Scroll results into view on small screens
+    if (window.innerWidth <= 900) {
+      const firstDuo = document.querySelector('.duo-block');
+      if (firstDuo) firstDuo.scrollIntoView({behavior:'smooth', block:'start'});
+    }
+  };
+
+  /* Attach click handler robustly (in case inline handlers removed) */
+  (function attachBtn(){
+    const btn = document.getElementById('btnCalculate');
+    if (!btn) return;
+    btn.addEventListener('click', function(e){
+      e.preventDefault();
+      try { window.calculer(); }
+      catch(err){
+        console.error(err);
+        document.getElementById('results').innerHTML = '<p style="color:red">Erreur JS: '+ (err && err.message ? err.message : err) +'</p>';
+      }
+    });
+  })();
+
+</script>
+</body>
+</html>
