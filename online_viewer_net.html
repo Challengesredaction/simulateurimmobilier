@@ -259,7 +259,34 @@
       results.innerHTML += html;
     });
   }
-</script>
+
+  // Safety wrapper: ensure the "Calculer" button triggers calculer() and report JS errors to the results div
+  (function(){
+    const calcBtn = document.querySelector('button[onclick="calculer()"]');
+    if (calcBtn) {
+      calcBtn.addEventListener('click', function(e){
+        e.preventDefault();
+        try {
+          // call the existing function (if it exists)
+          if (typeof calculer === 'function') {
+            calculer();
+          } else if (typeof window.calculer === 'function') {
+            window.calculer();
+          } else {
+            document.getElementById('results').innerHTML = '<p style="color:red;">Erreur : fonction calculer introuvable.</p>';
+          }
+        } catch (err) {
+          console.error(err);
+          document.getElementById('results').innerHTML = '<p style="color:red;">Erreur JavaScript : ' + (err && err.message ? err.message : err) + '</p>';
+        }
+      });
+    }
+
+    // Expose calculer to window scope if it's defined as a function (some replacements may have turned it into a local declaration)
+    if (typeof calculer === 'function' && typeof window.calculer !== 'function') {
+      window.calculer = calculer;
+    }
+  })();
 
 </body>
 </html>
