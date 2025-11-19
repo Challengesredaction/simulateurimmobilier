@@ -150,7 +150,7 @@
       </select>
     </div>
     <div style="width:100%; align-self:flex-end;">
-      <button onclick="calculer()">Calculer</button>
+      <button id="btnCalculate" type="button">Calculer</button>
     </div>
   </div>
 
@@ -179,7 +179,7 @@
     duo3: { paris: "#555555", banlieue: "#242424" }
   };
 
-  function calculer() {
+  window.calculer = function calculer() {
     const budget = parseFloat(document.getElementById("budget").value);
     const typeBien = document.getElementById("typeBien").value;
     const results = document.getElementById("results");
@@ -260,33 +260,15 @@
     });
   }
 
-  // Safety wrapper: ensure the "Calculer" button triggers calculer() and report JS errors to the results div
+  
+  // Attach click handler to the calculate button (in case inline handlers were removed)
   (function(){
-    const calcBtn = document.querySelector('button[onclick="calculer()"]');
-    if (calcBtn) {
-      calcBtn.addEventListener('click', function(e){
-        e.preventDefault();
-        try {
-          // call the existing function (if it exists)
-          if (typeof calculer === 'function') {
-            calculer();
-          } else if (typeof window.calculer === 'function') {
-            window.calculer();
-          } else {
-            document.getElementById('results').innerHTML = '<p style="color:red;">Erreur : fonction calculer introuvable.</p>';
-          }
-        } catch (err) {
-          console.error(err);
-          document.getElementById('results').innerHTML = '<p style="color:red;">Erreur JavaScript : ' + (err && err.message ? err.message : err) + '</p>';
-        }
-      });
-    }
-
-    // Expose calculer to window scope if it's defined as a function (some replacements may have turned it into a local declaration)
-    if (typeof calculer === 'function' && typeof window.calculer !== 'function') {
-      window.calculer = calculer;
+    var btn = document.getElementById('btnCalculate');
+    if (btn && typeof calculer === 'function') {
+      btn.addEventListener('click', function(e){ e.preventDefault(); calculer(); });
     }
   })();
 
+</script>
 </body>
 </html>
